@@ -1,0 +1,23 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Caché y compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Variables de entorno
+.env
+*.env.local
+
+# Archivos temporales de editor
+.vscode/
+.idea/
+.DS_Store
+
+# Archivos de entregas subidas (conservar directorio con .gitkeep)
+data/entregas_subidas/*
+!data/entregas_subidas/.gitkeep
