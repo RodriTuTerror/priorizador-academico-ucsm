@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aula Virtual UCSM — Réplica Moodle (Fase II)</title>
+    <style>
+        :root {
+            --ucsm-green-dark: #004d2c;
+            --ucsm-green: #006837;
+            --ucsm-green-light: #e6f2ec;
+            --bg-page: #f4f6f5;
+            --bg-card: #ffffff;
+            --text-main: #1f2924;
+            --text-muted: #56655d;
+            --border-color: #d5ded9;
+            --status-delivered-bg: #def7ec;
+            --status-delivered-text: #03543f;
+            --status-delivered-border: #84e1bc;
+            --status-pending-bg: #fef3c7;
+            --status-pending-text: #92400e;
+            --status-pending-border: #fcd34d;
+            --status-expired-bg: #fde8e8;
+            --status-expired-text: #9b1c1c;
+            --status-expired-border: #f8b4b4;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--ucsm-green-dark) 0%, var(--ucsm-green) 100%);
+            color: #ffffff;
+            padding: 1rem 2rem;
+            border-bottom: 4px solid #c59b27;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .header-container {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .brand-title h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .brand-title p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.65rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 0.95rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 5px;
+            border: 1px solid transparent;
+            cursor: pointer;
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+        }
+
+        .btn-outline-white {
+            background-color: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.45);
+        }
+
+        .btn-outline-white:hover {
+            background-color: rgba(255, 255, 255, 0.24);
+        }
+
+        .btn-primary {
+            background-color: var(--ucsm-green);
+            color: #ffffff;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--ucsm-green-dark);
+        }
+
+        main {
+            max-width: 1180px;
+            margin: 1.5rem auto 3rem;
+            padding: 0 1.25rem;
+        }
+
+        .flash-list {
+            margin-bottom: 1.25rem;
+        }
+
+        .flash-msg {
+            padding: 0.85rem 1.1rem;
+            border-radius: 6px;
+            margin-bottom: 0.6rem;
+            font-size: 0.92rem;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .flash-exito {
+            background-color: var(--status-delivered-bg);
+            color: var(--status-delivered-text);
+            border-color: var(--status-delivered-border);
+        }
+
+        .flash-error {
+            background-color: var(--status-expired-bg);
+            color: var(--status-expired-text);
+            border-color: var(--status-expired-border);
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--ucsm-green);
+            border-radius: 6px;
+            padding: 0.9rem 1.2rem;
+        }
+
+        .stat-card.pending {
+            border-left-color: #d97706;
+        }
+
+        .stat-card.delivered {
+            border-left-color: #059669;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .stat-value {
+            font-size: 1.65rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 0.15rem;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background-color: var(--ucsm-green-light);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.85rem 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h2 {
+            font-size: 1rem;
+            color: var(--ucsm-green-dark);
+            font-weight: 700;
+        }
+
+        .panel-body {
+            padding: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.9rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.83rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: var(--text-main);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.5rem 0.65rem;
+            font-size: 0.88rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: #ffffff;
+            color: var(--text-main);
+            font-family: inherit;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--ucsm-green);
+            box-shadow: 0 0 0 2px rgba(0, 104, 55, 0.15);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .task-card {
+            border: 1px solid var(--border-color);
+            border-radius: 7px;
+            padding: 1.15rem;
+            background-color: #ffffff;
+            transition: border-color 0.15s ease;
+        }
+
+        .task-card.is-delivered {
+            border-left: 5px solid #059669;
+            background-color: #fbfefc;
+        }
+
+        .task-card.is-pending {
+            border-left: 5px solid #d97706;
+        }
+
+        .task-card.is-expired {
+            border-left: 5px solid #dc2626;
+        }
+
+        .task-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.55rem;
+        }
+
+        .course-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--ucsm-green-dark);
+            background-color: var(--ucsm-green-light);
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            margin-bottom: 0.3rem;
+        }
+
+        .task-title {
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.28rem 0.7rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .badge-delivered {
+            background-color: var(--status-delivered-bg);
+            color: var(--status-delivered-text);
+            border-color: var(--status-delivered-border);
+        }
+
+        .badge-pending {
+            background-color: var(--status-pending-bg);
+            color: var(--status-pending-text);
+            border-color: var(--status-pending-border);
+        }
+
+        .badge-expired {
+            background-color: var(--status-expired-bg);
+            color: var(--status-expired-text);
+            border-color: var(--status-expired-border);
+        }
+
+        .task-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.85rem;
+            background: #f8faf9;
+            padding: 0.65rem 0.8rem;
+            border-radius: 5px;
+            border: 1px solid #edf2ef;
+        }
+
+        .task-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            font-size: 0.83rem;
+            color: var(--text-muted);
+            padding-top: 0.55rem;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .task-meta strong {
+            color: var(--text-main);
+        }
+
+        .priority-box {
+            margin-top: 0.75rem;
+            padding: 0.65rem 0.9rem;
+            background-color: #f0f7f4;
+            border: 1px solid #c3ddd0;
+            border-radius: 6px;
+            font-size: 0.83rem;
+            color: var(--ucsm-green-dark);
+        }
+
+        .delivery-box {
+            margin-top: 0.85rem;
+            padding: 0.8rem 1rem;
+            background-color: var(--status-delivered-bg);
+            border: 1px solid var(--status-delivered-border);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--status-delivered-text);
+        }
+
+        .delivery-box a {
+            color: var(--ucsm-green-dark);
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        .upload-details {
+            margin-top: 0.8rem;
+            padding-top: 0.7rem;
+            border-top: 1px solid #eef2f0;
+        }
+
+        .upload-details summary {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--ucsm-green);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .upload-form {
+            margin-top: 0.65rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        @media (max-width: 680px) {
+            .upload-form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding: 1.5rem 0;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-container">
+        <div class="brand-title">
+            <h1>UNIVERSIDAD CATÓLICA DE SANTA MARÍA — AULA VIRTUAL</h1>
+            <p>Escuela Profesional de Ingeniería de Sistemas · Réplica Moodle UCSM (Fase II)</p>
+        </div>
+        <div class="header-actions">
+            <a href="{{ url_for('descargar_calendario_ics') }}" class="btn btn-outline-white">
+                Descargar Calendario (.ics)
+            </a>
+            <form action="{{ url_for('ruta_inicializar_bd') }}" method="POST" style="display:inline;"
+                  onsubmit="return confirm('¿Está seguro de reiniciar la base de datos? Se restaurarán las 4 tareas semilla y se limpiarán las entregas subidas.');">
+                <button type="submit" class="btn btn-outline-white">
+                    Inicializar / Restaurar BD Semilla
+                </button>
+            </form>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-white">
+                Actualizar Estado
+            </a>
+        </div>
+    </div>
+</header>
+
+<main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-list">
+                {% for categoria, mensaje in messages %}
+                    <div class="flash-msg {{ 'flash-exito' if categoria == 'exito' else 'flash-error' }}">
+                        {{ mensaje }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% if error_bd %}
+        <div class="flash-msg flash-error">
+            <strong>Aviso de Conexión PostgreSQL:</strong> {{ error_bd }}
+        </div>
+    {% endif %}
+
+    <!-- Barra de indicadores -->
+    <section class="stats-bar">
+        <div class="stat-card">
+            <div class="stat-label">Total Actividades Registradas</div>
+            <div class="stat-value">{{ total_tareas }}</div>
+        </div>
+        <div class="stat-card pending">
+            <div class="stat-label">Actividades Pendientes</div>
+            <div class="stat-value">{{ total_pendientes }}</div>
+        </div>
+        <div class="stat-card delivered">
+            <div class="stat-label">Entregas Recibidas</div>
+            <div class="stat-value">{{ total_entregadas }}</div>
+        </div>
+    </section>
+
+    <div class="content-grid">
+        <!-- Columna izquierda: Crear nueva tarea -->
+        <aside class="panel">
+            <div class="panel-header">
+                <h2>Publicar Nueva Actividad</h2>
+            </div>
+            <div class="panel-body">
+                <form action="{{ url_for('ruta_crear_tarea') }}" method="POST">
+                    <div class="form-group">
+                        <label for="curso">Asignatura / Curso UCSM</label>
+                        <input type="text" id="curso" name="curso" class="form-control"
+                               placeholder="Ej. Pensamiento Computacional" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre_actividad">Título de la Actividad</label>
+                        <input type="text" id="nombre_actividad" name="nombre_actividad" class="form-control"
+                               placeholder="Ej. Informe Laboratorio 05" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="horas_plazo">Plazo de Entrega (en horas desde ahora)</label>
+                        <input type="number" step="0.5" min="0.5" id="horas_plazo" name="horas_plazo"
+                               class="form-control" placeholder="Ej. 24.0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="descripcion">Descripción e Instrucciones</label>
+                        <textarea id="descripcion" name="descripcion" class="form-control"
+                                  placeholder="Detalle los criterios de evaluación y entregables..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        Registrar Actividad en Moodle
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Columna derecha: Listado de tareas -->
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Actividades Académicas y Estado de Entregas</h2>
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Sincronizado con PostgreSQL (<code>moodle_ucsm</code>)</span>
+            </div>
+            <div class="panel-body">
+                {% if tareas %}
+                    <div class="task-list">
+                        {% for tarea in tareas %}
+                            {% set entregada = tarea.estado_entrega %}
+                            {% set vencida = (not entregada) and (tarea.tiempo_restante <= 0) %}
+                            <article class="task-card {{ 'is-delivered' if entregada else ('is-expired' if vencida else 'is-pending') }}">
+                                <div class="task-top">
+                                    <div>
+                                        <span class="course-tag">ID #{{ tarea.id_tarea }} · {{ tarea.curso }}</span>
+                                        <h3 class="task-title">{{ tarea.nombre_actividad }}</h3>
+                                    </div>
+                                    <div>
+                                        {% if entregada %}
+                                            <span class="badge badge-delivered">✓ ENTREGADO</span>
+                                        {% elif vencida %}
+                                            <span class="badge badge-expired">✕ PLAZO VENCIDO</span>
+                                        {% else %}
+                                            <span class="badge badge-pending">● PENDIENTE ({{ "%.2f"|format(tarea.tiempo_restante) }} h restantes)</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="task-desc">
+                                    {{ tarea.descripcion }}
+                                </div>
+
+                                <div class="task-meta">
+                                    <span>
+                                        <strong>Fecha límite:</strong>
+                                        {{ tarea.fecha_limite.strftime('%Y-%m-%d %H:%M:%S') if tarea.fecha_limite else 'N/A' }}
+                                    </span>
+                                    <span>
+                                        <strong>Tiempo restante:</strong>
+                                        {{ "%.2f"|format(tarea.tiempo_restante) }} horas
+                                    </span>
+                                    {% if tarea.esfuerzo_estimado is not none and tarea.importancia %}
+                                        <span>
+                                            <strong>Esfuerzo guardado:</strong> {{ "%.2f"|format(tarea.esfuerzo_estimado) }} h
+                                        </span>
+                                        <span>
+                                            <strong>Importancia:</strong> {{ tarea.importancia }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+
+                                {% if tarea.explicacion %}
+                                    <div class="priority-box">
+                                        <strong>Priorización Calculada:</strong> {{ tarea.explicacion }}
+                                    </div>
+                                {% endif %}
+
+                                {% if entregada %}
+                                    <div class="delivery-box">
+                                        <div>
+                                            <strong>Archivo entregado:</strong>
+                                            <a href="{{ url_for('descargar_entrega', nombre_archivo=tarea.archivo_entregado) }}" target="_blank">
+                                                {{ tarea.archivo_entregado }}
+                                            </a>
+                                        </div>
+                                        {% if tarea.comentario_entrega %}
+                                            <div style="margin-top: 0.25rem;">
+                                                <strong>Comentario del estudiante:</strong> {{ tarea.comentario_entrega }}
+                                            </div>
+                                        {% endif %}
+                                        {% if tarea.fecha_entrega %}
+                                            <div style="margin-top: 0.25rem; font-size: 0.78rem; opacity: 0.85;">
+                                                Registrado el: {{ tarea.fecha_entrega.strftime('%Y-%m-%d %H:%M:%S') }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% elif not vencida %}
+                                    <details class="upload-details">
+                                        <summary>Estimar esfuerzo / importancia o subir entrega (.pdf, .py, .zip, .docx, .md)</summary>
+                                        <form class="upload-form" action="{{ url_for('ruta_estimar_tarea', id_tarea=tarea.id_tarea) }}" method="POST" style="margin-bottom: 0.6rem;">
+                                            <input type="number" step="0.25" min="0.25" max="80" name="esfuerzo_estimado" class="form-control"
+                                                   placeholder="Esfuerzo estimado (h)" value="{{ tarea.esfuerzo_estimado if tarea.esfuerzo_estimado is not none else '' }}" required>
+                                            <select name="importancia" class="form-control" required>
+                                                <option value="" disabled {{ 'selected' if not tarea.importancia else '' }}>Seleccione Importancia...</option>
+                                                <option value="ALTA" {{ 'selected' if tarea.importancia == 'ALTA' else '' }}>ALTA</option>
+                                                <option value="MEDIA" {{ 'selected' if tarea.importancia == 'MEDIA' else '' }}>MEDIA</option>
+                                                <option value="BAJA" {{ 'selected' if tarea.importancia == 'BAJA' else '' }}>BAJA</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-primary">Guardar Estimación</button>
+                                        </form>
+                                        <form class="upload-form" action="{{ url_for('ruta_entregar_tarea', id_tarea=tarea.id_tarea) }}"
+                                              method="POST" enctype="multipart/form-data">
+                                            <input type="file" name="archivo" class="form-control"
+                                                   accept=".pdf,.py,.zip,.docx,.md" required>
+                                            <input type="text" name="comentario" class="form-control"
+                                                   placeholder="Comentario de entrega (opcional)">
+                                            <button type="submit" class="btn btn-primary">
+                                                Subir Entrega
+                                            </button>
+                                        </form>
+                                    </details>
+                                {% endif %}
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p style="color: var(--text-muted); text-align: center; padding: 2rem 0;">
+                        No hay actividades registradas en la base de datos. Haga clic en
+                        <strong>"Inicializar / Restaurar BD Semilla"</strong> en la barra superior o use la Opción 1 en <code>main.py</code>.
+                    </p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+</main>
+
+<footer>
+    Sistema de Priorización de Carga Académica Semanal + Réplica Moodle UCSM · Fase II (Pensamiento Computacional)
+</footer>
+
+</body>
+</html>
